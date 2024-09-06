@@ -18,6 +18,25 @@ Vector2f SeparationRule::computeForce(const std::vector<Boid*>& neighborhood, Bo
 
   separatingForce = Vector2f::normalized(separatingForce);
 
+  Vector2f boidPos = boid->getPosition();
+  float distance = 0;
+  Vector2f distVector = Vector2f::zero();
+  Vector2f nearestNeighborPos = Vector2f::zero();
+  float closestDistance = desiredMinimalDistance;
+
+  if (!neighborhood.empty()) {
+    for (auto* neighbor : neighborhood) {
+      distance = sqrt(pow(boidPos.x - neighbor->getPosition().x,2) + pow(boidPos.y - neighbor->getPosition().y,2));
+      if (distance < closestDistance) {
+        closestDistance = distance;
+        nearestNeighborPos = neighbor->getPosition();
+      }
+    }
+
+    distVector = boidPos - nearestNeighborPos;
+    separatingForce = distVector * 1/closestDistance;
+  }
+
   return separatingForce;
 }
 
