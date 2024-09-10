@@ -16,43 +16,19 @@ Vector2f SeparationRule::computeForce(const std::vector<Boid*>& neighborhood, Bo
   //        // todo: find and apply force only on the closest mates
   //    }
 
-  Vector2f boidPos = boid->getPosition();
   Vector2f distVector = Vector2f::zero();
-  Vector2f nearestNeighborPos = Vector2f::zero();
-  float distance = 0;
-  float closestDistance = desiredMinimalDistance;
 
   if (!neighborhood.empty()) {  // Find the position of the closest neighbor
     for (auto* neighbor : neighborhood) {
-      distance = sqrt(pow(boidPos.x - neighbor->getPosition().x,2) + pow(boidPos.y - neighbor->getPosition().y,2));
-      if (distance < closestDistance) {
-        closestDistance = distance;
-        nearestNeighborPos = neighbor->getPosition();
+      distVector = boid->getPosition() - neighbor->getPosition();
+      if (distVector.getMagnitude() > 0 && distVector.getMagnitude() <= desiredMinimalDistance) {
+        separatingForce += Vector2f::normalized(distVector) / distVector.getMagnitude();
+      } else if (distVector.getMagnitude() == 0 || distVector.getMagnitude() > desiredMinimalDistance) {
+        separatingForce += Vector2f::zero();
       }
     }
-
-    /* Best attempt */
-    distVector = boidPos - nearestNeighborPos;
-    separatingForce = distVector * 1/closestDistance;
-
-    /* similar to formula without summation, doesn't work in practice */
-    //distVector = nearestNeighborPos - boidPos;
-    //separatingForce = Vector2f::normalized(distVector) / distVector.getMagnitude();
-
-    /* Most similar to formula, includes summation, doesn't work in practice */
-    /*for (auto* neighbor : neighborhood) {
-      distance = sqrt(pow(boidPos.x - neighbor->getPosition().x,2) + pow(boidPos.y - neighbor->getPosition().y,2));
-      if (distance > 0 && distance < desiredMinimalDistance) {
-        distVector = boidPos - neighbor->getPosition();
-        //separatingForce += (Vector2f::normalized(distVector) / distVector.getMagnitude());
-        separatingForce = distVector * 1/closestDistance;
-      } else {
-        separatingForce = Vector2f::zero();
-      }
-    }*/
   }
 
-  //separatingForce = Vector2f::normalized(separatingForce);
   return separatingForce;
 }
 
