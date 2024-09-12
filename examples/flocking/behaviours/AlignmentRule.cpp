@@ -9,6 +9,8 @@ Vector2f AlignmentRule::computeForce(const std::vector<Boid*>& neighborhood, Boi
   // hint: iterate over the neighborhood
 
   if (neighborhood.size() > 0) {
+
+    // Calculate the averageVelocity of the neighborhood
     for (auto neighbor : neighborhood) {
       averageVelocity += neighbor->getVelocity();
     }

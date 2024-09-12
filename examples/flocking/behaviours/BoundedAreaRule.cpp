@@ -11,17 +11,34 @@ Vector2f BoundedAreaRule::computeForce(const std::vector<Boid*>& neighborhood, B
   // hint: use this->world->engine->window->size() and desiredDistance
 
   auto size = this->world->engine->window->size();
+  Vector2f boidPos = boid->getPosition();
+  Vector2f displacement = Vector2f::zero();
 
-  Vector2f topLeftCorner = Vector2f(-size.x, size.y);
-  Vector2f bottomLeftCorner = Vector2f(-size.x, -size.y);
+  // The point on the nearest boundary that the boid is closest to
+  Vector2f boundIntercept = Vector2f::zero();
 
-  Vector2f leftBound = bottomLeftCorner - topLeftCorner;
+  // Left boundary position
+  if (boidPos.x <= 0 + desiredDistance) {
+    boundIntercept = Vector2f(0, boidPos.y);
+  }
+  // Right boundary position
+  if (boidPos.x >= size.x - desiredDistance) {
+    boundIntercept = Vector2f(size.x, boidPos.y);
+  }
+  // Bottom boundary position
+  if (boidPos.y <= 0 + desiredDistance) {
+    boundIntercept = Vector2f(boidPos.x, 0);
+  }
+  // Top boundary position
+  if (boidPos.y >= size.y - desiredDistance) {
+    boundIntercept = Vector2f(boidPos.x, size.y);
+  }
 
-  if (boid->getPosition().x <= -size.x + desiredDistance) {
-    force += Vector2f::normalized(Vector2f(-leftBound.y, leftBound.x)) / Vector2f(-leftBound.y, leftBound.x).getMagnitude(); // Inverse proportion
-
-    //Vector2f displacementLB = boid->getPosition() - leftBound;
-    //force += displacementLB / boid->getDetectionRadius();
+  // Only apply this force if the boid is near a boundary
+  if (boundIntercept.getMagnitude() != 0) {
+    displacement = boidPos - boundIntercept;
+    force += displacement / boid->getDetectionRadius();
+    force *= boid->getVelocity().getMagnitude();
   }
 
   return force;
