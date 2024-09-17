@@ -30,7 +30,7 @@ Vector2f MouseInfluenceRule::computeForce(const std::vector<Boid*>& neighborhood
     float distance = displacement.getMagnitude();                 // get the distance between the boid and the cursor
     Vector2f force = displacement / boid->getDetectionRadius();   // Calculate the force created by the mouse
 
-    if (isRepulsive) force *= -1.f;   // Invert the force if needed. Technically it's inverted by default but sadly there is no antonym to the word "invert". :(
+    if (isRepulsive) force *= -1.f;   // Invert the force if needed
 
     if (distance <= boid->getDetectionRadius()) return force;     // Only apply this force if the mouse is near the boid
     else return Vector2f::zero();

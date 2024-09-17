@@ -24,13 +24,15 @@ Vector2f SeparationRule::computeForce(const std::vector<Boid*>& neighborhood, Bo
       // Get the distance between boid and neighbor
       distVector = boid->getPosition() - neighbor->getPosition();
 
-      // Check if neighbor is within the desiredMinimalDistance aka "hate radius" as per my professor
+      // Check if neighbor is within the desiredMinimalDistance
       if (distVector.getMagnitude() > 0 && distVector.getMagnitude() <= desiredMinimalDistance) {
         separatingForce += Vector2f::normalized(distVector) / distVector.getMagnitude();
       } else if (distVector.getMagnitude() == 0 || distVector.getMagnitude() > desiredMinimalDistance) {
         separatingForce += Vector2f::zero();
       }
     }
+
+    separatingForce *= boid->getVelocity().getMagnitude();
   }
 
   return separatingForce;
