@@ -5,19 +5,29 @@
 bool RecursiveBacktrackerExample::Step(World* w) {
   // todo: implement this
 
+  auto sizeOver2 = w->GetSize()/2;
   // General variables
   int currentNeighbor = 0;
 
   // Random integer list
-  int randomList[] = {72, 99, 56, 34, 43, 62, 31, 4, 70, 22, 6, 65, 96, 71, 29, 9, 98, 41, 90, 7, 30, 3, 97, 49, 63, 88, 47, 82, 91, 54, 74, 2, 86, 14, 58, 35, 89, 11, 10, 60, 28, 21, 52, 50, 55, 69, 76, 94, 23, 66, 15, 57, 44, 18, 67, 5, 24, 33, 77, 53, 51, 59, 20, 42, 80, 61, 1, 0, 38, 64, 45, 92, 46, 79, 93, 95, 37, 40, 83, 13, 12, 78, 75, 73, 84, 81, 8, 32, 27, 19, 87, 85, 16, 25, 17, 68, 26, 39, 48, 36};
-  int index = 0;
+  static int randomList[] = {72, 99, 56, 34, 43, 62, 31, 4, 70, 22, 6, 65, 96, 71, 29, 9, 98, 41, 90, 7, 30, 3, 97, 49, 63, 88, 47, 82, 91, 54, 74, 2, 86, 14, 58, 35, 89, 11, 10, 60, 28, 21, 52, 50, 55, 69, 76, 94, 23, 66, 15, 57, 44, 18, 67, 5, 24, 33, 77, 53, 51, 59, 20, 42, 80, 61, 1, 0, 38, 64, 45, 92, 46, 79, 93, 95, 37, 40, 83, 13, 12, 78, 75, 73, 84, 81, 8, 32, 27, 19, 87, 85, 16, 25, 17, 68, 26, 39, 48, 36};
+  static int index = 0;
   if (index > 100) index = 0;
 
-  // Check if the map is empty or completed
-  if (stack.empty())
-  {
+  // Bootstrap case
+  auto randP = randomStartPoint(w);
+  if (stack.empty() && visited[randP.x][randP.y] == false ) {
     stack.emplace_back(randomStartPoint(w));
-  } else if (stack.size() == 1 && getVisitables(w, stack.front()).empty()) return false;
+    // mark color
+    visited[randP.x][randP.y] = true;
+    return true;
+  }
+
+  // // Check if the map is empty or completed
+  // if (stack.empty())
+  // {
+  //   stack.emplace_back(randomStartPoint(w));
+  // } else if (stack.size() == 1 && getVisitables(w, stack.front()).empty()) return false;
 
   // Get a list of visitable neighbors
   std::vector<Point2D> visitableNeighbors = getVisitables(w, stack.back());
@@ -37,7 +47,7 @@ bool RecursiveBacktrackerExample::Step(World* w) {
     stack.emplace_back(visitableNeighbors[currentNeighbor]);
   } else if (visitableNeighbors.size() == 0)  // Backtrack
   {
-    visited[stack.back().x][stack.back().y] = true;
+    visited[stack.back().x][stack.back().y] = true; // todo (Liam): add to visited when the space is added to the stack, not when it's popped off
     stack.pop_back();
   }
 
@@ -73,6 +83,8 @@ std::vector<Point2D> RecursiveBacktrackerExample::getVisitables(World* w, const 
   Point2D currentPoint;
 
   // todo: implement this
+
+  // todo (Liam): check if neighbor is in the stack
 
   // Check the neighbors above and below
   for (int i = p.y - 1; i <= p.y + 1; i += 2)
