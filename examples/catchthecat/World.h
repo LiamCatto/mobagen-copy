@@ -9,6 +9,7 @@
 #include <bitset>
 #include <iostream>
 #include <vector>
+#include <queue>
 
 class World : GameObject {
 private:
@@ -106,6 +107,11 @@ public:
     n.push_back(SE(point));
     return n;
   }
+
+  // Made by me (Liam)
+
+  std::vector<Point2D> getVisitableNeighbors(Point2D point, std::queue<Point2D> frontier);
+
 };
 
 #endif  // WORLD_H
