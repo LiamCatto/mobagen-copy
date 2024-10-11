@@ -240,8 +240,15 @@ bool World::catWinsOnSpace(Point2D point) {
 
 // Made by be (Liam)
 
-std::vector<Point2D> getVisitableNeighbors(Point2D point, std::queue<Point2D> frontier)
+std::vector<Point2D> World::getVisitableNeighbors(Point2D point, std::queue<Point2D> frontier)
 {
-  std::vector<Point2D> result {Point2D(0, 0)};
+  std::vector<Point2D> neighborList = World::neighbors(point);
+  std::vector<Point2D> result;
+
+  for (int i = 0; i < neighborList.size(); i++)
+  {
+    if (neighborList[i] != catPosition && !getContent(neighborList[i])) result.push_back(neighborList[i]);
+  }
+
   return result;
 }

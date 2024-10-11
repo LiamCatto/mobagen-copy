@@ -33,7 +33,7 @@ std::vector<Point2D> Agent::generatePath(World* w) {
 
     for (int i = 0; i < visitables.size(); ++i)
     {
-      if (cameFrom[visitables[i]] == Point2D(NULL, NULL))
+      if (cameFrom[visitables[i]] == Point2D())
       {
         cameFrom[frontier.back()] = visitables[i];
         frontier.push(visitables[i]);
@@ -48,9 +48,25 @@ std::vector<Point2D> Agent::generatePath(World* w) {
     }
   }
 
-  // todo (Liam): complete the below
   // if the border is not infinity, build the path from border to the cat using the camefrom map
   // if there isnt a reachable border, just return empty vector
   // if your vector is filled from the border to the cat, the first element is the catcher move, and the last element is the cat move
-  return vector<Point2D>();
+
+  std::vector<Point2D> path = vector<Point2D>();
+  Point2D current = borderExit;
+
+  if (borderExit != Point2D::INFINITE)
+  {
+    while (current != catPos)
+    {
+      path.push_back(current);
+      current = cameFrom[current];
+      std::cout << current.x << " " << current.y << std::endl;
+    }
+  }
+
+  return path;
 }
+
+// todo (Liam): currently there is a bug with the game ending on the first turn due to a bad move by the cat.
+// todo (Liam): It seems that the issue is with the contents of the cameFrom map.
