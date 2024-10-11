@@ -9,5 +9,6 @@ Point2D Catcher::Move(World* world) {
   //   if (cat.x != p.x && cat.y != p.y && !world->getContent(p)) return p;
   // }
 
+  std::cout << generatePath(world)[0].x << " " << generatePath(world)[0].y << std::endl;
   return generatePath(world)[0];
 }

@@ -30,12 +30,14 @@ std::vector<Point2D> Agent::generatePath(World* w) {
     visited[frontier.back()] = true;
 
     std::vector<Point2D> visitables = w->getVisitableNeighbors(frontier.back(), frontier);
+    //for (int i = 0; i < visitables.size(); i++) std::cout << visitables[i].x << " " << visitables[i].y << std::endl;
 
-    for (int i = 0; i < visitables.size(); ++i)
+    for (int i = 0; i < visitables.size(); i++)
     {
-      if (cameFrom[visitables[i]] == Point2D())
+      if (cameFrom[visitables[i]] == Point2D(0, 0))
       {
-        cameFrom[frontier.back()] = visitables[i];
+        //cout << cameFrom[visitables[i]].x << ", " << cameFrom[visitables[i]].y << endl;
+        cameFrom[visitables[i]] = frontier.back();
         frontier.push(visitables[i]);
         frontierSet.insert(visitables[i]);
       }
@@ -61,12 +63,11 @@ std::vector<Point2D> Agent::generatePath(World* w) {
     {
       path.push_back(current);
       current = cameFrom[current];
-      std::cout << current.x << " " << current.y << std::endl;
+      //std::cout << current.x << " " << current.y << ", " << catPos.x << " " << catPos.y << std::endl;
     }
   }
 
   return path;
 }
 
-// todo (Liam): currently there is a bug with the game ending on the first turn due to a bad move by the cat.
-// todo (Liam): It seems that the issue is with the contents of the cameFrom map.
+// todo (Liam): Current issue seems to be catcher getting stuck in an infinite loop while the path is being reconstructed.
