@@ -16,6 +16,7 @@ std::vector<Point2D> Agent::generatePath(World* w) {
   frontierSet.insert(catPos);
   Point2D borderExit = Point2D::INFINITE;  // if at the end of the loop we dont find a border, we have to return random points
 
+  std::cout << "catPos: " << catPos.x << " " << catPos.y << std::endl;
   while (!frontier.empty()) {
     // get the current from frontier
     // remove the current from frontierset
@@ -26,28 +27,32 @@ std::vector<Point2D> Agent::generatePath(World* w) {
     // enqueue the neighbors to frontier and frontierset
     // do this up to find a visitable border and break the loop
 
-    frontierSet.erase(frontier.back());
-    visited[frontier.back()] = true;
+    Point2D current = frontier.back();
 
-    std::vector<Point2D> visitables = w->getVisitableNeighbors(frontier.back(), frontier);
-    //for (int i = 0; i < visitables.size(); i++) std::cout << visitables[i].x << " " << visitables[i].y << std::endl;
-
-    for (int i = 0; i < visitables.size(); i++)
-    {
-      if (cameFrom[visitables[i]] == Point2D(0, 0))
-      {
-        //cout << cameFrom[visitables[i]].x << ", " << cameFrom[visitables[i]].y << endl;
-        cameFrom[visitables[i]] = frontier.back();
-        frontier.push(visitables[i]);
-        frontierSet.insert(visitables[i]);
-      }
-    }
-
-    if (frontier.back().x == w->getWorldSideSize()/2 || frontier.back().x == -1 * w->getWorldSideSize()/2 || frontier.back().y == w->getWorldSideSize()/2 || frontier.back().y == -1 * w->getWorldSideSize()/2)
+    if (current.x == w->getWorldSideSize()/2 || current.x == -1 * w->getWorldSideSize()/2 || current.y == w->getWorldSideSize()/2 || current.y == -1 * w->getWorldSideSize()/2)
     {
       borderExit = frontier.back();
       break;
     }
+
+    frontierSet.erase(current);
+    visited[current] = true;
+
+    std::vector<Point2D> visitables = w->getVisitableNeighbors(current, frontier);
+    for (int i = 0; i < visitables.size(); i++) std::cout << visitables[i].x << " " << visitables[i].y << std::endl;
+
+    for (int i = 0; i < visitables.size(); i++)
+    {
+      if (cameFrom.count(visitables[i]) == 0)
+      {
+        frontier.push(visitables[i]);
+        frontierSet.insert(visitables[i]);
+        //cameFrom[visitables[i]] = current;
+        cameFrom.insert({visitables[i], current});
+        //cout << cameFrom[visitables[i]].x << ", " << cameFrom[visitables[i]].y << endl;
+      }
+    }
+
   }
 
   // if the border is not infinity, build the path from border to the cat using the camefrom map
@@ -56,6 +61,7 @@ std::vector<Point2D> Agent::generatePath(World* w) {
 
   std::vector<Point2D> path = vector<Point2D>();
   Point2D current = borderExit;
+  //std::cout << current.x << " " << current.y << endl;
 
   if (borderExit != Point2D::INFINITE)
   {
@@ -63,11 +69,12 @@ std::vector<Point2D> Agent::generatePath(World* w) {
     {
       path.push_back(current);
       current = cameFrom[current];
-      //std::cout << current.x << " " << current.y << ", " << catPos.x << " " << catPos.y << std::endl;
+      //std::cout << "Current: " << current.x << " " << current.y << " Next: " << cameFrom[current].x << " " << cameFrom[current].y << " Cat: " << catPos.x << " " << catPos.y << std::endl;
     }
   }
 
+  std::cout << std::endl;
   return path;
 }
 
-// todo (Liam): Current issue seems to be catcher getting stuck in an infinite loop while the path is being reconstructed.
+// todo (Liam): Current issue is that the Cat does not adapt when it is blocked off. If its target is blocked, it just sits in place and gets stuck in an infinite loop instead of searching for a new target. sometiems the cat gets stuck in a corner. It seems to refuse to search upwards or right, however it'll move right to dodge an obstacle.

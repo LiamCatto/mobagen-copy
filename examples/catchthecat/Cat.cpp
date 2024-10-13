@@ -24,5 +24,8 @@ Point2D Cat::Move(World* world) {
 
   //std::cout << generatePath(world).size() << std::endl;
   //std::cout << generatePath(world)[generatePath(world).size() - 1].x << " " << generatePath(world)[generatePath(world).size() - 1].y << std::endl;
-  return generatePath(world)[generatePath(world).size() - 1];
+  std::vector<Point2D> path = generatePath(world);
+  int size = path.size();
+
+  return path[size - 1];
 }
