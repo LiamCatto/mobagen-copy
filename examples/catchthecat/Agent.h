@@ -3,6 +3,9 @@
 #include "math/Point2D.h"
 #include <vector>
 
+#include <stdlib.h>
+#include <time.h>
+
 class World;
 
 class Agent {

@@ -27,5 +27,6 @@ Point2D Cat::Move(World* world) {
   std::vector<Point2D> path = generatePath(world);
   int size = path.size();
 
-  return path[size - 1];
+  if (size > 0) return path[size - 1];
+  else return path[0];
 }
