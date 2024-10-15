@@ -4,9 +4,55 @@
 #include <queue>
 #include "World.h"
 using namespace std;
+
+struct Agent::AStarNode {  // Written by my professor, Alexandre Tolstenko. Copied from code he gave to the class.
+  AStarNode(Point2D p, int h, int a) : point(p), heuristic(h), accumulatedDistance(a){};
+  AStarNode() = default;
+
+  Point2D point = Point2D(0, 0);
+  int heuristic = 0;
+  int accumulatedDistance = 0;
+
+  // operator less for the priority queue
+  bool operator<(const AStarNode& other) const {
+    // the operators are swapped because we are looking for the minimum
+    return heuristic + accumulatedDistance > other.heuristic + other.accumulatedDistance;
+  }
+  // struct AStarLess {
+  //   bool operator<(const AStarNode& left, const AStarNode& right) const {
+  //     // the operators are swapped because we are looking for the minimum
+  //     return left.heuristic + left.accumulatedDistance > right.heuristic + right.accumulatedDistance;
+  //   }
+  // };
+};
+
+int Agent::heuristic(Point2D p, int SideSizeOver2) {  // First case written by my professor, Alexandre Tolstenko. Copied from code he gave to the class.
+  // Distance to right border
+  if (p.x - p.y > 0 && p.x + p.y > 0) {
+    return SideSizeOver2 - p.x;
+  }
+  // Distance to bottom border
+  if (p.x - p.y > 0 && p.x + p.y < 0) {
+    return SideSizeOver2 - p.y;
+  }
+  // Distance to left border
+  if (p.x - p.y < 0 && p.x + p.y < 0) {
+    return SideSizeOver2 + p.x;
+  }
+  // Distance to top border
+  if (p.x - p.y < 0 && p.x + p.y > 0) {
+    return SideSizeOver2 + p.y;
+  }
+  // Case where the agent is equally distant from all borders
+  if (p.x == 0 && p.y == 0) {
+    return SideSizeOver2;
+  }
+}
+
 std::vector<Point2D> Agent::generatePath(World* w) {
   unordered_map<Point2D, Point2D> cameFrom;  // to build the flowfield and build the path
   queue<Point2D> frontier;                   // to store next ones to visit
+  //priority_queue<Point2D, std::unordered_map<Point2D, AStarNode>, AStarNode::AStarLess> frontier;
   unordered_set<Point2D> frontierSet;        // OPTIMIZATION to check faster if a point is in the queue
   unordered_map<Point2D, bool> visited;      // use .at() to get data, if the element dont exist [] will give you wrong results
 
@@ -17,6 +63,9 @@ std::vector<Point2D> Agent::generatePath(World* w) {
   Point2D borderExit = Point2D::INFINITE;  // if at the end of the loop we dont find a border, we have to return random points
 
   std::vector<Point2D> visitables;
+  std::unordered_map<Point2D, AStarNode> nodeSet;
+  int costPerTile = 1;
+  nodeSet[catPos] = AStarNode(catPos, heuristic(catPos, w->getWorldSideSize()/2), 0);
 
   //std::cout << "catPos: " << catPos.x << " " << catPos.y << std::endl;
   while (!frontier.empty()) {
@@ -45,8 +94,21 @@ std::vector<Point2D> Agent::generatePath(World* w) {
 
     for (int i = 0; i < visitables.size(); i++)
     {
-      if (cameFrom.count(visitables[i]) == 0)
+      // if (cameFrom.count(visitables[i]) == 0)
+      // {
+      //   frontier.push(visitables[i]);
+      //   frontierSet.insert(visitables[i]);
+      //   //cameFrom[visitables[i]] = current;
+      //   cameFrom.insert({visitables[i], current});
+      //   //cout << cameFrom[visitables[i]].x << ", " << cameFrom[visitables[i]].y << endl;
+      // }
+
+      int newCost = costPerTile + nodeSet[current].accumulatedDistance;
+      if (nodeSet.count(visitables[i]) == 0 || newCost < nodeSet[visitables[i]].accumulatedDistance)
       {
+        int distToBorder = heuristic(visitables[i], w->getWorldSideSize()/2);
+        nodeSet.emplace(visitables[i], AStarNode(visitables[i], distToBorder, newCost));
+
         frontier.push(visitables[i]);
         frontierSet.insert(visitables[i]);
         //cameFrom[visitables[i]] = current;
@@ -91,4 +153,4 @@ std::vector<Point2D> Agent::generatePath(World* w) {
   return path;
 }
 
-// todo (Liam): implement heuristic searching with priority queue
+// todo (Liam): switch from queue to priority queue, with the priority based on the AStarNode less operator. Maybe make a priorityQueue of AStarNodes and push each point as a node?

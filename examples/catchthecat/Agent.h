@@ -9,7 +9,13 @@
 class World;
 
 class Agent {
+private:
+
+  struct AStarNode;
+  int heuristic(Point2D p, int SideSizeOver2);
+
 public:
+
   explicit Agent() = default;
 
   virtual Point2D Move(World*) = 0;
