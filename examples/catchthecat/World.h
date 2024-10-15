@@ -110,7 +110,7 @@ public:
 
   // Made by me (Liam)
 
-  std::vector<Point2D> getVisitableNeighbors(Point2D point, std::queue<Point2D> frontier);
+  std::vector<AStarNode> getVisitableNeighbors(AStarNode node, std::priority_queue<AStarNode> frontier, int costPerTile);
 
 };
 
