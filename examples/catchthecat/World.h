@@ -107,11 +107,6 @@ public:
     n.push_back(SE(point));
     return n;
   }
-
-  // Made by me (Liam)
-
-  std::vector<AStarNode> getVisitableNeighbors(AStarNode node, std::priority_queue<AStarNode> frontier, int costPerTile);
-
 };
 
 #endif  // WORLD_H

@@ -2,6 +2,7 @@
 #define AGENT_H
 #include "math/Point2D.h"
 #include <vector>
+#include <queue>
 
 #include <stdlib.h>
 #include <time.h>
@@ -21,6 +22,12 @@ struct AStarNode {
     // the operators are swapped because we are looking for the minimum
     return heuristic + accumulatedDistance > other.heuristic + other.accumulatedDistance;
   }
+
+  // equal-to operator for use in a set
+  // bool operator==(const AStarNode& other) const {
+  //   return point == other.point && heuristic == other.heuristic && accumulatedDistance == other.accumulatedDistance;
+  // }
+
   // struct AStarLess {
   //   bool operator<(const AStarNode& left, const AStarNode& right) const {
   //     // the operators are swapped because we are looking for the minimum
@@ -36,10 +43,9 @@ public:
 
   virtual Point2D Move(World*) = 0;
 
+  int calcHeuristic(Point2D p, int SideSizeOver2);
   std::vector<Point2D> generatePath(World* w);
-
-  int heuristic(Point2D p, int SideSizeOver2);
-  std::vector<AStarNode> getVisitableNeighbors(AStarNode node, std::priority_queue<AStarNode> frontier, int costPerTile)
+  std::vector<AStarNode> getVisitableNeighbors(World* w, AStarNode node, std::priority_queue<AStarNode> frontier, int costPerTile);
 };
 
 

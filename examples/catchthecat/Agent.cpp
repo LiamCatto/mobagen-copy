@@ -1,12 +1,11 @@
 #include "Agent.h"
 #include <unordered_set>
 #include <unordered_map>
-#include <queue>
 #include "World.h"
 using namespace std;
 
 
-int Agent::heuristic(Point2D p, int SideSizeOver2) {  // First case written by my professor, Alexandre Tolstenko. Copied from code he gave to the class.
+int Agent::calcHeuristic(Point2D p, int SideSizeOver2) {  // First case written by my professor, Alexandre Tolstenko. Copied from code he gave to the class.
   // Distance to right border
   if (p.x - p.y > 0 && p.x + p.y > 0) {
     return SideSizeOver2 - p.x;
@@ -24,9 +23,9 @@ int Agent::heuristic(Point2D p, int SideSizeOver2) {  // First case written by m
     return SideSizeOver2 + p.y;
   }
   // Case where the agent is equally distant from all borders
-  if (p.x == 0 && p.y == 0) {
-    return SideSizeOver2;
-  }
+  //if (p.x == 0 && p.y == 0) {
+  return SideSizeOver2;
+  //}
 }
 
 std::vector<Point2D> Agent::generatePath(World* w) {
@@ -44,8 +43,9 @@ std::vector<Point2D> Agent::generatePath(World* w) {
 
   std::vector<AStarNode> visitables;
   std::unordered_map<Point2D, AStarNode> nodeSet;
+  //std::unordered_set<AStarNode> nodeSet;
   int costPerTile = 1;
-  nodeSet[catPos] = AStarNode(catPos, heuristic(catPos, w->getWorldSideSize()/2), 0);
+  nodeSet[catPos] = AStarNode(catPos, calcHeuristic(catPos, w->getWorldSideSize()/2), 0);
 
   //std::cout << "catPos: " << catPos.x << " " << catPos.y << std::endl;
   while (!frontier.empty()) {
@@ -68,7 +68,7 @@ std::vector<Point2D> Agent::generatePath(World* w) {
       break;
     }
 
-    visitables = w->getVisitableNeighbors(current, frontier, costPerTile);
+    visitables = getVisitableNeighbors(w, current, frontier, costPerTile);
     //for (int i = 0; i < visitables.size(); i++) std::cout << visitables[i].x << " " << visitables[i].y << std::endl;
     //std::cout << std::endl;
 
@@ -84,16 +84,18 @@ std::vector<Point2D> Agent::generatePath(World* w) {
       // }
 
       int newCost = costPerTile + current.accumulatedDistance;
-      if (nodeSet.count(visitables[i].point) == 0 || newCost < nodeSet[visitables[i].point].accumulatedDistance)
+      if (!nodeSet.contains(visitables[i].point) || newCost < nodeSet[visitables[i].point].accumulatedDistance)
       {
         //int distToBorder = heuristic(visitables[i].point, w->getWorldSideSize()/2);
-        nodeSet.emplace(visitables[i].point, AStarNode(visitables[i], distToBorder, newCost));
+        //nodeSet.emplace(visitables[i].point, AStarNode(visitables[i], distToBorder, newCost));
+        nodeSet[visitables[i].point].accumulatedDistance = newCost;
 
-        frontier.emplace(visitables[i], distToBorder, newCost);
+        //frontier.emplace(visitables[i], distToBorder, newCost);
+        frontier.push(visitables[i]);
         //frontierSet.insert(visitables[i]);
         //cameFrom[visitables[i]] = current;
-        cameFrom.insert({visitables[i], current});
-        //cout << cameFrom[visitables[i]].x << ", " << cameFrom[visitables[i]].y << endl;
+        cameFrom[visitables[i].point] = current.point;
+        //cout << frontier.top().point.x << ", " << frontier.top().point.y << " Priority: " << frontier.top().heuristic + frontier.top().accumulatedDistance << endl;  // Should be showing the priority for each node added to the frontier
       }
     }
 
@@ -117,11 +119,11 @@ std::vector<Point2D> Agent::generatePath(World* w) {
       //std::cout << "Current: " << current.x << " " << current.y << " Next: " << cameFrom[current].x << " " << cameFrom[current].y << " Cat: " << catPos.x << " " << catPos.y << std::endl;
     }
   }
-  else if (visitables.size() > 0)   // If a border cannot be found, then create a path to a random visitable neighbor
+  else if (visitables.size() > 1)   // If a border cannot be found, then create a path to a random visitable neighbor
   {
     srand(time(NULL));
     int randomNum = rand() % (visitables.size() - 1);
-    path.push_back(visitables[randomNum]);
+    path.push_back(visitables[randomNum].point);
   }
   else    // If the cat is unable to move, end the game by moving outside the world bounds (and therefore more than 1 tile)
   {
@@ -133,19 +135,19 @@ std::vector<Point2D> Agent::generatePath(World* w) {
   return path;
 }
 
-std::vector<AStarNode> getVisitableNeighbors(AStarNode node, std::priority_queue<AStarNode> frontier, int costPerTile)
+std::vector<AStarNode> Agent::getVisitableNeighbors(World* w, AStarNode node, std::priority_queue<AStarNode> frontier, int costPerTile)
 {
   std::vector<Point2D> neighborList = World::neighbors(node.point);
   std::vector<AStarNode> result;
 
   for (int i = 0; i < neighborList.size(); i++)
   {
-    if (neighborList[i] != catPosition && !getContent(neighborList[i])) {
-      result.emplace_back(neighborList[i], heuristic(node.point, getWorldSideSize()/2), node.accumulatedDistance + costPerTile);
+    if (neighborList[i] != w->getCat() && !w->getContent(neighborList[i])) {
+      result.emplace_back(neighborList[i], calcHeuristic(node.point, w->getWorldSideSize()/2), node.accumulatedDistance + costPerTile);
     }
   }
 
   return result;
 }
 
-// todo (Liam): switch from queue to priority queue, with the priority based on the AStarNode less operator. Maybe make a priorityQueue of AStarNodes and push each point as a node?
+// todo (Liam): I'm not sure if the queue is following the correct priority. Sometimes the cat moves away from what is clearly the nearest border. Will ask about it in class.
